@@ -1,6 +1,8 @@
 import logging
 import os
 import requests
+from requests.exceptions import RequestException
+
 import urlparse
 
 from HTMLParser import HTMLParseError
@@ -101,8 +103,12 @@ class Mirror(object):
 
         for download in to_download:
             logger.info("Fetching {0}".format(download))
-            response = requests.get(download)
-            if not response.status_code == 200:
+            error = False
+            try:
+                response = requests.get(download)
+            except RequestException:
+                error = True
+            if error or not response.status_code == 200:
                 logger.error("Error fetching {0}, status {1}".format(
                     download, response.status_code,
                 ))
